@@ -1,0 +1,3 @@
+mnist
+fire
+tqdm
