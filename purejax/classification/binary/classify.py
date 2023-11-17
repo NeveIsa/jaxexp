@@ -6,7 +6,8 @@ from jax.tree_util import tree_map
 from fire import Fire
 import mnist
 from tqdm import tqdm
-
+import jaxopt
+from functools import partial 
 
 def loadmnist():
     X = mnist.test_images()
@@ -71,7 +72,7 @@ def main(iters=300, lr=0.1, act="sigmoid"):
     # ytrain = 2*ytrain - 1
 
     scale = 1
-    params = [
+    init_params = [
         np.random.randn(1, 10),
         np.random.randn(10, 100),
         np.random.randn(100, 100),
@@ -79,22 +80,33 @@ def main(iters=300, lr=0.1, act="sigmoid"):
         np.random.randn(100, 100),
         np.random.randn(100, 28 * 28),
     ]
-    params = [p * scale for p in params]
+    init_params = [p * scale for p in init_params]
 
     # loss = lossfn(params, Xtest, ytest, activation=actfn)
     # print(loss)
 
-    params = train(params, Xtrain, ytrain, activation=actfn, lr=lr, iters=iters)
+    params = train(init_params, Xtrain, ytrain, activation=actfn, lr=lr, iters=iters)
 
     yhat = neuralnet(params, Xtest, activation=actfn)
     yhat = (yhat > 0.5) * 1
-
     test_err = (1 * (yhat == ytest)).sum() / ytest.shape[1]
     print(f"Test Accuracy  -> {100*test_err:2f}%")
 
     # print(yhat)
     # print(ytest)
+    exit()
 
+    
+    print("\nUsing jaxopt")
+    newlossfn = partial(lossfn, activation=actfn)
+    solver = jaxopt.GradientDescent(newlossfn, maxiter=300, verbose=True)
+    res = solver.run(init_params, Xtrain, ytrain, actfn)
+    print(res.params)
 
+    yhat = neuralnet(res.params, Xtest, activation=actfn)
+    yhat = (yhat > 0.5) * 1
+    test_err = (1 * (yhat == ytest)).sum() / ytest.shape[1]
+    print(f"Test Accuracy (jaxopt) -> {100*test_err:2f}%")
+    
 if __name__ == "__main__":
     Fire(main)
