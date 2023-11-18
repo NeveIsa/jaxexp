@@ -19,6 +19,7 @@ def loadmnist():
 
     # normalize -> this is critical for convergence of the network
     # https://stats.stackexchange.com/questions/421927/neural-networks-input-data-normalization-and-centering
+    # https://stats.stackexchange.com/questions/420231/effect-of-rescaling-of-inputs-on-loss-for-a-simple-neural-network/420330#420330
     Xtrain = Xtrain / 255
     Xtest = Xtest / 255
 
