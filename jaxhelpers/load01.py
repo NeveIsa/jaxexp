@@ -18,6 +18,7 @@ def loadmnist():
     Xtest = np.vstack([_.flatten() for _ in Xtest]).T
 
     # normalize -> this is critical for convergence of the network
+    # https://stats.stackexchange.com/questions/421927/neural-networks-input-data-normalization-and-centering
     Xtrain = Xtrain / 255
     Xtest = Xtest / 255
 
